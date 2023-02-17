@@ -29,6 +29,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String calculateDataStr;
     String calculateData = "";
 
+    private ArrayList<String> HistList = new ArrayList<>();
+    private static final String STATE_COUNTER = "counter";
+    private static final String STATE_HIST = "history";
+
     protected void onSaveInstanceState (@NonNull Bundle outState){
         super.onSaveInstanceState(outState);
         if(solutionTV.getText().toString()!= null) {
@@ -37,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(resultTV.getText().toString()!= null) {
             outState.putString("result", resultTV.getText().toString());
         }
+        outState.putString(STATE_COUNTER,String.valueOf(resultTV.getText()));
+        outState.putStringArrayList(STATE_HIST, HistList);
 
     }
 
@@ -60,20 +66,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         solutionTV = findViewById(R.id.solution_tv);
         buttonHistory = this.findViewById(R.id.button_history);
 
+        if (savedInstanceState != null){
+            calculateDataStr = savedInstanceState.getString(STATE_COUNTER, "");
+            resultTV.setText(calculateDataStr);
+            HistList = savedInstanceState.getStringArrayList(STATE_HIST);
+        }
+
         buttonHistory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(calculateData == "") {
-                    System.out.println("There's no calculated history");
-                }else {
-                    Intent intent = new Intent(getApplicationContext(), MainActivity2.class);
-                    if(calculateDataStr.contains("null")) {
-                        calculateDataStr = calculateDataStr.substring(4);
-                    }
-                    intent.putExtra("calculateDataStr", calculateDataStr);
-                    startActivity(intent);
+                Intent intent = new Intent(getApplicationContext(), MainActivity2.class);
+                if(calculateDataStr.contains("null")) {
+                    calculateDataStr = calculateDataStr.substring(4);
                 }
-                }
+                intent.putStringArrayListExtra("LS", HistList);
+                startActivity(intent);
+            }
         });
 
         assignId(buttonAC, R.id.button_ac);
@@ -116,8 +124,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if(buttonText.equals("=")){
             calculateData = dataToCalculate;
             String finalResult = getResult(dataToCalculate);
-            calculateData += " = " + finalResult;
-            calculateDataStr += calculateData + '\n';
+            calculateData+= " = " + finalResult;
+            calculateDataStr = calculateData;
+            if(calculateDataStr.contains("null")) {
+                calculateDataStr = calculateDataStr.substring(4);
+            }
+            HistList.add(calculateDataStr);
             if(!finalResult.equals("Error")){
                 resultTV.setText(finalResult);
             }
@@ -125,7 +137,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             dataToCalculate += buttonText;
         }
-
         solutionTV.setText(dataToCalculate);
     }
 
