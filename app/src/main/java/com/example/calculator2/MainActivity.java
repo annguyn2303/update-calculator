@@ -133,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if(!finalResult.equals("Error")){
                 resultTV.setText(finalResult);
             }
+            solutionTV.setText(resultTV.getText().toString());
             return;
         } else {
             dataToCalculate += buttonText;
